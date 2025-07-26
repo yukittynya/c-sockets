@@ -34,7 +34,7 @@ See more information [bind()](https://www.man7.org/linux/man-pages/man2/bind.2.h
 After binding the socket can then begin listening on that port through ```listen(fd, backlog)``` returns -1 if error
 See more information [listen()](https://www.man7.org/linux/man-pages/man2/listen.2.html) 
 
-Then it can begin accepting clients, ```client_fd accept(fd, sockaddr, addr_len)``` returns -1 if error  
+Then it can begin accepting clients, ```client_fd = accept(fd, sockaddr, addr_len)``` returns -1 if error  
 See more information [accept()](https://man7.org/linux/man-pages/man2/accept.2.html) 
 
 Now you can create the client socket, the client socket does not need to bind, listen or accept, it only needs to connect to the server socket, ```connect(fd, sockaddr, addr_len)```   
@@ -45,4 +45,5 @@ After this the two sockets can begin communicating, let your imagination run wil
 ## Sources used
 
 [A Beginners Guide to Socket Programming in C](https://dev.to/sanjayrv/a-beginners-guide-to-socket-programming-in-c-5an5)    
+
 [TCP Server-Client implementation in C](https://www.geeksforgeeks.org/c/tcp-server-client-implementation-in-c/)   
