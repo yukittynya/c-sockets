@@ -44,5 +44,5 @@ After this the two sockets can begin communicating, let your imagination run wil
 
 ## Sources used
 
-[A Beginners Guide to Socket Programming in C](https://dev.to/sanjayrv/a-beginners-guide-to-socket-programming-in-c-5an5) 
-[TCP Server-Client implementation in C](https://www.geeksforgeeks.org/c/tcp-server-client-implementation-in-c/) 
+[A Beginners Guide to Socket Programming in C](https://dev.to/sanjayrv/a-beginners-guide-to-socket-programming-in-c-5an5)    
+[TCP Server-Client implementation in C](https://www.geeksforgeeks.org/c/tcp-server-client-implementation-in-c/)   
