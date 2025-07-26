@@ -4,11 +4,11 @@ Learning how sockets work :3
 
 ## Usage
 
-```make server``` to build the server 
-```make client``` to build the client 
+```make server``` to build the server   
+```make client``` to build the client   
 
-```./build/bin/server``` to run the server
-```./build/bin/client``` to run the client
+```./build/bin/server``` to run the server   
+```./build/bin/client``` to run the client   
 
 
 ## Notes
