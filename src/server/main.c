@@ -1,16 +1,18 @@
 #include <netinet/in.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <sys/socket.h>
 #include <string.h>
+#include <sys/socket.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #define MAX_BUFFER 128
 #define LISTEN_BACKLOG 50
 #define PORT 8080
 
-void handle_chat(int client_fd) {
+void* handle_chat(void* args) {
+    int client_fd = *(int*)args;
     char buffer[MAX_BUFFER];
     int i = 0;
     
@@ -32,8 +34,11 @@ void handle_chat(int client_fd) {
             printf("Server Exit...\n"); 
             break; 
         }
-
     }
+
+    pthread_exit(NULL);
+
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -66,19 +71,33 @@ int main(int argc, char *argv[]) {
     } else {
         printf("Socket is listening\n");
     }
-    
+
+    pthread_t tid[10];
+    int i = 0;
+
     struct sockaddr_in client_addr;
     int client_fd;
-    socklen_t client_size = sizeof(client_addr);
+    socklen_t client_size;
 
-    if ((client_fd = accept(socket_fd, (struct sockaddr*) &client_addr, &client_size)) < 0) {
-        printf("ERROR: Unable to accept client\n");
-        exit(1);
-    } else {
-        printf("Accepted client\n");
+    while (1) {
+        client_size = sizeof(client_addr);
+
+        if ((client_fd = accept(socket_fd, (struct sockaddr*) &client_addr, &client_size)) < 0) {
+            printf("ERROR: Unable to accept client\n");
+            exit(1);
+        } else {
+            printf("Accepted client\n");
+            pthread_create(&tid[i++], NULL, handle_chat, &client_fd);
+        }
+
+        if (i >= 10) {
+            i = 0;
+
+            while (i < 10) {
+                pthread_join(tid[i++], NULL);
+            }
+        }
     }
-
-    handle_chat(client_fd);
 
     close(socket_fd);
 }
