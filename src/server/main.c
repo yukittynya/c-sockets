@@ -1,40 +1,48 @@
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <pthread.h>
 
-#define MAX_BUFFER 128
+#define MAX_BUFFER 4096
 #define LISTEN_BACKLOG 50
 #define PORT 8080
 
-void* handle_chat(void* args) {
+void* handle_ftp(void* args) {
     int client_fd = *(int*)args;
+    FILE* fp;
+    int n = 0;
+
+    fp = fopen("received.png", "wb");
+
+    int size;
+    read(client_fd, &size, sizeof(size));
+
     char buffer[MAX_BUFFER];
-    int i = 0;
-    
-    for (;;) {
-        bzero(buffer, MAX_BUFFER);
+    int bytes_read = 0;
 
-        read(client_fd, buffer, sizeof(buffer));
-        printf("\nUser: %s\nEnter response: ", buffer);
+    while (bytes_read < size) {
+        n = read(client_fd, buffer, sizeof(buffer)); 
 
-        bzero(buffer, MAX_BUFFER);
-
-        i = 0;
-        
-        while ((buffer[i++] = getchar()) != '\n'); 
-
-        write(client_fd, buffer, sizeof(buffer));
-
-        if (strncmp("exit", buffer, 4) == 0) { 
-            printf("Server Exit...\n"); 
-            break; 
+        if (n < 0) {
+            printf("ERROR: recv() failed\n");
+            exit(1);
         }
+
+        if (n == 0) {
+            printf("Client disconnected\n");
+            break;
+        }
+
+        fwrite(buffer, 1, n, fp);
+        bytes_read += n;
     }
+
+    
+    fclose(fp);
 
     pthread_exit(NULL);
 
@@ -87,7 +95,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         } else {
             printf("Accepted client\n");
-            pthread_create(&tid[i++], NULL, handle_chat, &client_fd);
+            pthread_create(&tid[i++], NULL, handle_ftp, &client_fd);
         }
 
         if (i >= 10) {
