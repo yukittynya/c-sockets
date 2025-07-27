@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #define MAX_BUFFER 4096
@@ -13,16 +14,47 @@
 
 void* handle_ftp(void* args) {
     int client_fd = *(int*)args;
-    FILE* fp;
-    int n = 0;
-
-    fp = fopen("received.png", "wb");
 
     int size;
-    read(client_fd, &size, sizeof(size));
+    if (read(client_fd, &size, sizeof(size)) < 0) {
+        printf("ERROR: Reading file size\n");
+        exit(1);
+    }
 
+    int filename_len;
+    if (read(client_fd, &filename_len, sizeof(filename_len)) < 0) {
+        printf("ERROR: Reading file name length");
+        exit(1);
+    }
+
+    if (filename_len <= 0) {
+        printf("ERROR: Filename length too short\n");
+        exit(1);
+    }
+
+    char filename[filename_len + 1];
+
+    if (read(client_fd, filename, filename_len) < 0) {
+        printf("ERROR: Reading filename");
+        exit(1);
+    }
+
+    filename[filename_len] = '\0';
+
+    char filepath[256];
+
+    struct stat st = {0};
+    if (stat("outputs", &st) == -1) {
+        mkdir("outputs", 0755);
+    }
+    snprintf(filepath, sizeof(filepath), "outputs/%s", filename); 
+
+    FILE* fp;
     char buffer[MAX_BUFFER];
     int bytes_read = 0;
+    int n = 0;
+
+    fp = fopen(filepath, "wb");
 
     while (bytes_read < size) {
         n = read(client_fd, buffer, sizeof(buffer)); 
@@ -40,7 +72,6 @@ void* handle_ftp(void* args) {
         fwrite(buffer, 1, n, fp);
         bytes_read += n;
     }
-
     
     fclose(fp);
 
