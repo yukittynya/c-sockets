@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
 #include <stddef.h>
@@ -49,6 +50,9 @@ void* handle_ftp(void* args) {
     }
     snprintf(filepath, sizeof(filepath), "outputs/%s", filename); 
 
+    float mb_size = (float) size / 1024 / 1024;
+    printf("Downloading file: %s\nSize %.2f Mb\nOutput path: %s\n", filename, mb_size, filepath);
+
     FILE* fp;
     char buffer[MAX_BUFFER];
     int bytes_read = 0;
@@ -72,6 +76,8 @@ void* handle_ftp(void* args) {
         fwrite(buffer, 1, n, fp);
         bytes_read += n;
     }
+
+    printf("SUCCESS: Downloaded %s\n", filename);
     
     fclose(fp);
 
@@ -125,7 +131,11 @@ int main(int argc, char *argv[]) {
             printf("ERROR: Unable to accept client\n");
             exit(1);
         } else {
-            printf("Accepted client\n");
+            char client_ipv4[INET_ADDRSTRLEN];
+
+            inet_ntop(AF_INET, &client_addr.sin_addr.s_addr, client_ipv4, sizeof(client_ipv4));
+
+            printf("Accepted client: %s\n", client_ipv4); 
             pthread_create(&tid[i++], NULL, handle_ftp, &client_fd);
         }
 

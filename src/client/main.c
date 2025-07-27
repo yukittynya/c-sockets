@@ -40,6 +40,11 @@ void handle_ftp(int socket_fd) {
 
     FILE* fp = fopen(filepath, "rb");
 
+    if (!fp) {
+        printf("ERROR: File does not exist");
+        exit(1);
+    }
+
     fseek(fp, 0, SEEK_END);
     int size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
